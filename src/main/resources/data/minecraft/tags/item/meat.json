@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "beshnstuff:horse_meat"
+    "beshnstuff:horse_meat",
+    "beshnstuff:cooked_horse_meat"
   ]
 }
