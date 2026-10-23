@@ -5,7 +5,7 @@
 
 [![Download on Modrinth](https://img.shields.io/modrinth/v/besh-n-stuff?style=flat&logo=modrinth&label=Modrinth)](https://modrinth.com/mod/besh-n-stuff)
 
-🇰🇿 Add some kazakh vibe to your Minecraft!
+🇰🇿 Add a Kazakh vibe to your Minecraft!
 
 ## The mod includes:
 
