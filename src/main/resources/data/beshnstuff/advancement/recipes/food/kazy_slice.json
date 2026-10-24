@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_kazy": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "beshnstuff:kazy"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "beshnstuff:kazy_slice"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_kazy"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "beshnstuff:kazy_slice"
+    ]
+  }
+}

@@ -28,6 +28,20 @@ public class BeshNStuffMod {
                             .nutrition(8)
                             .saturationModifier(0.8f)
                             .build()));
+    public static final DeferredItem<Item> KAZY = ITEMS.registerSimpleItem(
+            "kazy",
+            new Item.Properties()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(8)
+                            .saturationModifier(0.3f)
+                            .build()));
+    public static final DeferredItem<Item> KAZY_SLICE = ITEMS.registerSimpleItem(
+            "kazy_slice",
+            new Item.Properties()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(12)
+                            .saturationModifier(0.8f)
+                            .build()));
     public static final DeferredItem<Item> BAURSAK = ITEMS.registerSimpleItem(
             "baursak",
             new Item.Properties()
@@ -46,6 +60,8 @@ public class BeshNStuffMod {
         if (event.getTabKey() == CreativeModeTabs.FOOD_AND_DRINKS) {
             event.accept(HORSE_MEAT);
             event.accept(COOKED_HORSE_MEAT);
+            event.accept(KAZY);
+            event.accept(KAZY_SLICE);
             event.accept(BAURSAK);
         }
     }

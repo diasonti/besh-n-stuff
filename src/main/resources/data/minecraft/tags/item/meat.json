@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "beshnstuff:horse_meat",
-    "beshnstuff:cooked_horse_meat"
+    "beshnstuff:cooked_horse_meat",
+    "beshnstuff:kazy",
+    "beshnstuff:kazy_slice"
   ]
 }
