@@ -28,6 +28,14 @@ public class BeshNStuffMod {
                             .nutrition(8)
                             .saturationModifier(0.8f)
                             .build()));
+    public static final DeferredItem<Item> BAURSAK = ITEMS.registerSimpleItem(
+            "baursak",
+            new Item.Properties()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(1)
+                            .saturationModifier(0.6f)
+                            .fast()
+                            .build()));
 
     public BeshNStuffMod(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
@@ -38,6 +46,7 @@ public class BeshNStuffMod {
         if (event.getTabKey() == CreativeModeTabs.FOOD_AND_DRINKS) {
             event.accept(HORSE_MEAT);
             event.accept(COOKED_HORSE_MEAT);
+            event.accept(BAURSAK);
         }
     }
 }

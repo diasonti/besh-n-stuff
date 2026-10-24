@@ -11,10 +11,10 @@
 
 - **Horse meat** - drops from horses, cook it in a furnace or smoker
 - **Horse milking** - use an empty bucket on an adult horse
+- **Baursak** - craft from 2 wheat
 
 ## Currently on the roadmap:
 
-- **Baursak**
 - **Kazy**
 - **Beshbarmak**
 
