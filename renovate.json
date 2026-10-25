@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "ignorePresets": [
+    "group:monorepos",
+    "group:recommended"
+  ],
+  "enabledManagers": [
+    "gradle",
+    "gradle-wrapper",
+    "github-actions"
+  ],
+  "automerge": false,
+  "packageRules": [
+    {
+      "description": "Keep dependencies manually managed.",
+      "matchManagers": ["gradle"],
+      "enabled": false
+    },
+    {
+      "description": "Allow update PRs for Gradle plugins only.",
+      "matchManagers": ["gradle"],
+      "matchDepTypes": ["plugin"],
+      "enabled": true
+    }
+  ]
+}
