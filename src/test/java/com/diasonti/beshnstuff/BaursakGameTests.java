@@ -90,6 +90,14 @@ public final class BaursakGameTests {
         helper.succeed();
     }
 
+    @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
+    public static void doughRecipeIsAbsentWithoutFarmersDelight(GameTestHelper helper) {
+        var recipeId = ResourceLocation.fromNamespaceAndPath(BeshNStuffMod.MODID, "compat/farmersdelight/baursak_from_dough");
+        helper.assertTrue(helper.getLevel().getRecipeManager().byKey(recipeId).isEmpty(),
+                "The dough recipe must not load without Farmer's Delight");
+        helper.succeed();
+    }
+
     private static void assertCraftsThreeBaursak(GameTestHelper helper, CraftingInput input) {
         var recipe = helper.getLevel().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, helper.getLevel()).orElseThrow();
         helper.assertTrue(recipe.id().equals(RECIPE_ID), "Two wheat should match the baursak recipe");

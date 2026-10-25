@@ -36,8 +36,11 @@ jobs:
       - name: Build
         run: ./gradlew --no-daemon --stacktrace build
 
-      - name: Run GameTests
+      - name: Run standalone GameTests
         run: ./gradlew --no-daemon --stacktrace runGameTestServer
+
+      - name: Run integration GameTests
+        run: ./gradlew --no-daemon --stacktrace runIntegrationGameTestServer
 
       - name: Upload artifacts
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

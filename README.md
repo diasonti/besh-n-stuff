@@ -16,6 +16,11 @@
 - **Baursak** - craft from 2 wheat
 - **Kazy** - craft from 3 horse meats row, then cook it in a furnace or smoker for slices
 
+## Farmer's Delight support
+
+With [Farmer's Delight](https://modrinth.com/mod/farmers-delight) installed:
+- Cook **1 wheat dough** into **2 baursak** in a heated [skillet](https://github.com/vectorwing/FarmersDelight/wiki/Skillet)
+
 ## Currently on the roadmap:
 
 - **Beshbarmak**
