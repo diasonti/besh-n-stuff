@@ -1,9 +1,11 @@
 package com.diasonti.beshnstuff;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.horse.Horse;
@@ -23,6 +25,24 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class HorseMeatGameTests {
     private HorseMeatGameTests() {
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
+    public static void horseMeatUsesCorrectCommonFoodTags(GameTestHelper helper) {
+        var rawMeatTag = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "foods/raw_meat"));
+        var cookedMeatTag = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "foods/cooked_meat"));
+        var rawBeefTag = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "foods/raw_beef"));
+        var cookedBeefTag = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "foods/cooked_beef"));
+        var rawHorseMeat = new ItemStack(BeshNStuffMod.HORSE_MEAT.get());
+        var cookedHorseMeat = new ItemStack(BeshNStuffMod.COOKED_HORSE_MEAT.get());
+
+        helper.assertTrue(rawHorseMeat.is(rawMeatTag), "Raw horse meat should be recognized as generic raw meat without Farmer's Delight");
+        helper.assertTrue(!rawHorseMeat.is(cookedMeatTag), "Raw horse meat should not be recognized as cooked meat");
+        helper.assertTrue(cookedHorseMeat.is(cookedMeatTag), "Cooked horse meat should be recognized as generic cooked meat without Farmer's Delight");
+        helper.assertTrue(!cookedHorseMeat.is(rawMeatTag), "Cooked horse meat should not be recognized as raw meat");
+        helper.assertTrue(!rawHorseMeat.is(rawBeefTag) && !cookedHorseMeat.is(cookedBeefTag),
+                "Horse meat should not be recognized as beef");
+        helper.succeed();
     }
 
     @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")

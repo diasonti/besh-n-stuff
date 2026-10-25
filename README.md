@@ -22,6 +22,7 @@ With [Farmer's Delight](https://modrinth.com/mod/farmers-delight) installed:
 - Cook **1 raw horse meat** into **1 cooked horse meat** in a heated skillet
 - Cook **1 wheat dough** into **2 baursak** in a heated skillet
 - Cook **1 kazy** into **4 slices** in a heated cooking pot (no bowl required)
+- Use **horse meat** in recipes accepting generic raw/cooked meat
 
 ## Currently on the roadmap:
 

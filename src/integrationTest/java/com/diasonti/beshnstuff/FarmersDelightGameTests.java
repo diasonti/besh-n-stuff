@@ -36,6 +36,8 @@ public final class FarmersDelightGameTests {
     private static final ResourceLocation DOUGH_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "wheat_dough");
     private static final ResourceLocation SKILLET_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "skillet");
     private static final ResourceLocation COOKING_POT_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "cooking_pot");
+    private static final ResourceLocation CABBAGE_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "cabbage");
+    private static final ResourceLocation CABBAGE_ROLL_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "cabbage_rolls");
 
     private FarmersDelightGameTests() {
     }
@@ -68,6 +70,25 @@ public final class FarmersDelightGameTests {
         helper.assertTrue(result.is(BeshNStuffMod.COOKED_HORSE_MEAT.get()) && result.getCount() == 1,
                 "One raw horse meat should produce exactly one cooked horse meat with Farmer's Delight installed");
         helper.succeed();
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty", timeoutTicks = 160)
+    public static void cookingPotCooksHorseMeatIntoCabbageRoll(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(1, 2, 1);
+        helper.setBlock(pos.below(), Blocks.CAMPFIRE);
+        helper.setBlock(pos, BuiltInRegistries.BLOCK.getOptional(COOKING_POT_ID).orElseThrow());
+        CookingPotBlockEntity pot = helper.getBlockEntity(pos);
+        pot.getInventory().setStackInSlot(0, new ItemStack(BeshNStuffMod.HORSE_MEAT.get()));
+        pot.getInventory().setStackInSlot(1, new ItemStack(BuiltInRegistries.ITEM.getOptional(CABBAGE_ID).orElseThrow()));
+
+        helper.runAtTickTime(140, () -> {
+            ItemStack output = pot.getInventory().getStackInSlot(CookingPotBlockEntity.OUTPUT_SLOT);
+            helper.assertTrue(output.is(BuiltInRegistries.ITEM.getOptional(CABBAGE_ROLL_ID).orElseThrow()) && output.getCount() == 1,
+                    "Raw horse meat and cabbage should produce one Farmer's Delight cabbage roll");
+            helper.assertTrue(pot.getInventory().getStackInSlot(0).isEmpty() && pot.getInventory().getStackInSlot(1).isEmpty(),
+                    "Cooking cabbage rolls should consume the horse meat and cabbage");
+            helper.succeed();
+        });
     }
 
     @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
