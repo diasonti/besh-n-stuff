@@ -14,12 +14,13 @@
 - **Horse meat** - drops from horses, cook it in a furnace or smoker
 - **Horse milking** - use an empty bucket on an adult horse
 - **Baursak** - craft from 2 wheat
-- **Kazy** - craft from 3 horse meats row, then cook it in a furnace or smoker for slices
+- **Kazy** - craft from 3 horse meats row, then cook it in a furnace or smoker for 3 slices
 
 ## Farmer's Delight support
 
 With [Farmer's Delight](https://modrinth.com/mod/farmers-delight) installed:
-- Cook **1 wheat dough** into **2 baursak** in a heated [skillet](https://github.com/vectorwing/FarmersDelight/wiki/Skillet)
+- Cook **1 wheat dough** into **2 baursak** in a heated skillet
+- Cook **1 kazy** into **4 slices** in a heated cooking pot (no bowl required)
 
 ## Currently on the roadmap:
 

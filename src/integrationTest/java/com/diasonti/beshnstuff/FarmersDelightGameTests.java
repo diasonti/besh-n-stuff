@@ -18,14 +18,22 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.wrapper.RecipeWrapper;
+import vectorwing.farmersdelight.common.block.entity.CookingPotBlockEntity;
+import vectorwing.farmersdelight.common.crafting.CookingPotRecipe;
+import vectorwing.farmersdelight.common.registry.ModRecipeTypes;
 
 @GameTestHolder
 @PrefixGameTestTemplate(false)
 public final class FarmersDelightGameTests {
     private static final ResourceLocation RECIPE_ID = ResourceLocation.fromNamespaceAndPath(
             BeshNStuffMod.MODID, "compat/farmersdelight/baursak_from_dough");
+    private static final ResourceLocation KAZY_RECIPE_ID = ResourceLocation.fromNamespaceAndPath(
+            BeshNStuffMod.MODID, "compat/farmersdelight/kazy_slice_from_cooking");
     private static final ResourceLocation DOUGH_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "wheat_dough");
     private static final ResourceLocation SKILLET_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "skillet");
+    private static final ResourceLocation COOKING_POT_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "cooking_pot");
 
     private FarmersDelightGameTests() {
     }
@@ -47,6 +55,61 @@ public final class FarmersDelightGameTests {
         helper.assertTrue(!cooking.matches(new SingleRecipeInput(new ItemStack(Items.WHEAT)), helper.getLevel()),
                 "Raw wheat should not replace dough in the cooking recipe");
         helper.succeed();
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
+    public static void kazyCookingRecipeProducesFourSlices(GameTestHelper helper) {
+        var recipes = helper.getLevel().getRecipeManager();
+        var recipe = recipes.byKey(KAZY_RECIPE_ID).orElseThrow();
+        helper.assertTrue(recipe.value() instanceof CookingPotRecipe, "Kazy should use a cooking pot recipe");
+        var cooking = (CookingPotRecipe) recipe.value();
+
+        for (int slot = 0; slot < CookingPotRecipe.INPUT_SLOTS; slot++) {
+            var inventory = new ItemStackHandler(CookingPotRecipe.INPUT_SLOTS);
+            inventory.setStackInSlot(slot, new ItemStack(BeshNStuffMod.KAZY.get()));
+            var input = new RecipeWrapper(inventory);
+            var matched = recipes.getRecipeFor(ModRecipeTypes.COOKING.get(), input, helper.getLevel()).orElseThrow();
+            helper.assertTrue(matched.id().equals(KAZY_RECIPE_ID), "Kazy in any ingredient slot should match the cooking pot recipe");
+            ItemStack result = cooking.assemble(input, helper.getLevel().registryAccess());
+            helper.assertTrue(result.is(BeshNStuffMod.KAZY_SLICE.get()) && result.getCount() == 4,
+                    "One kazy should produce exactly four slices in a cooking pot");
+        }
+
+        helper.assertTrue(cooking.getCookTime() == 200, "Kazy should take 200 ticks to cook in a pot");
+        helper.assertTrue(cooking.getOutputContainer().isEmpty(), "Kazy slices should not require a bowl or other container");
+        var inventory = new ItemStackHandler(CookingPotRecipe.INPUT_SLOTS);
+        inventory.setStackInSlot(0, new ItemStack(BeshNStuffMod.HORSE_MEAT.get()));
+        helper.assertTrue(!cooking.matches(new RecipeWrapper(inventory), helper.getLevel()),
+                "Raw horse meat should not replace kazy in the cooking pot recipe");
+        inventory.setStackInSlot(0, new ItemStack(BeshNStuffMod.KAZY.get()));
+        inventory.setStackInSlot(1, new ItemStack(BeshNStuffMod.KAZY.get()));
+        helper.assertTrue(!cooking.matches(new RecipeWrapper(inventory), helper.getLevel()),
+                "Extra ingredients should not match the kazy cooking pot recipe");
+        helper.succeed();
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty", timeoutTicks = 240)
+    public static void cookingPotCooksKazyIntoFourSlices(GameTestHelper helper) {
+        assertCookingPotProducesSlices(helper, 1, 220);
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty", timeoutTicks = 440)
+    public static void cookingPotCooksTwoKazyIntoEightSlices(GameTestHelper helper) {
+        assertCookingPotProducesSlices(helper, 2, 420);
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty", timeoutTicks = 240)
+    public static void unheatedCookingPotDoesNotCookKazy(GameTestHelper helper) {
+        CookingPotBlockEntity pot = prepareCookingPot(helper, false, 1);
+
+        helper.runAtTickTime(220, () -> {
+            ItemStack input = pot.getInventory().getStackInSlot(0);
+            helper.assertTrue(input.is(BeshNStuffMod.KAZY.get()) && input.getCount() == 1,
+                    "An unheated cooking pot should retain the uncooked kazy");
+            helper.assertTrue(pot.getMeal().isEmpty() && pot.getInventory().getStackInSlot(CookingPotBlockEntity.OUTPUT_SLOT).isEmpty(),
+                    "An unheated cooking pot should not produce slices");
+            helper.succeed();
+        });
     }
 
     @GameTestGenerator
@@ -94,5 +157,27 @@ public final class FarmersDelightGameTests {
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BuiltInRegistries.ITEM.getOptional(DOUGH_ID).orElseThrow()));
         helper.useBlock(pos, player);
         helper.assertTrue(player.getMainHandItem().isEmpty(), "The skillet should accept the wheat dough");
+    }
+
+    private static CookingPotBlockEntity prepareCookingPot(GameTestHelper helper, boolean heated, int inputCount) {
+        BlockPos pos = new BlockPos(1, 2, 1);
+        helper.setBlock(pos.below(), heated ? Blocks.CAMPFIRE : Blocks.STONE);
+        helper.setBlock(pos, BuiltInRegistries.BLOCK.getOptional(COOKING_POT_ID).orElseThrow());
+        CookingPotBlockEntity pot = helper.getBlockEntity(pos);
+        pot.getInventory().setStackInSlot(0, new ItemStack(BeshNStuffMod.KAZY.get(), inputCount));
+        return pot;
+    }
+
+    private static void assertCookingPotProducesSlices(GameTestHelper helper, int inputCount, int ticks) {
+        CookingPotBlockEntity pot = prepareCookingPot(helper, true, inputCount);
+
+        helper.runAtTickTime(ticks, () -> {
+            ItemStack output = pot.getInventory().getStackInSlot(CookingPotBlockEntity.OUTPUT_SLOT);
+            helper.assertTrue(output.is(BeshNStuffMod.KAZY_SLICE.get()) && output.getCount() == inputCount * 4,
+                    "A heated cooking pot should produce exactly four slices per kazy without containers");
+            helper.assertTrue(pot.getInventory().getStackInSlot(0).isEmpty(), "Cooking should consume the kazy");
+            helper.assertTrue(pot.getMeal().isEmpty(), "Slices should move directly to the output slot");
+            helper.succeed();
+        });
     }
 }

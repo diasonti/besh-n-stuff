@@ -153,6 +153,14 @@ public final class KazyGameTests {
         assertCookingWaitsForOutputSpace(helper, Blocks.SMOKER, 120);
     }
 
+    @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
+    public static void cookingPotRecipeIsAbsentWithoutFarmersDelight(GameTestHelper helper) {
+        var recipeId = ResourceLocation.fromNamespaceAndPath(BeshNStuffMod.MODID, "compat/farmersdelight/kazy_slice_from_cooking");
+        helper.assertTrue(helper.getLevel().getRecipeManager().byKey(recipeId).isEmpty(),
+                "The cooking pot recipe must not load without Farmer's Delight");
+        helper.succeed();
+    }
+
     private static void assertEatingRestoresFood(GameTestHelper helper, ItemStack kazy, int expectedHunger, float expectedSaturation) {
         var player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.getFoodData().setFoodLevel(8);
