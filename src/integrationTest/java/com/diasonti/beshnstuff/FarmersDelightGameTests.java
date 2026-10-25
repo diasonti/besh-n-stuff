@@ -31,6 +31,8 @@ public final class FarmersDelightGameTests {
             BeshNStuffMod.MODID, "compat/farmersdelight/baursak_from_dough");
     private static final ResourceLocation KAZY_RECIPE_ID = ResourceLocation.fromNamespaceAndPath(
             BeshNStuffMod.MODID, "compat/farmersdelight/kazy_slice_from_cooking");
+    private static final ResourceLocation HORSE_MEAT_RECIPE_ID = ResourceLocation.fromNamespaceAndPath(
+            BeshNStuffMod.MODID, "cooked_horse_meat_from_campfire_cooking");
     private static final ResourceLocation DOUGH_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "wheat_dough");
     private static final ResourceLocation SKILLET_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "skillet");
     private static final ResourceLocation COOKING_POT_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "cooking_pot");
@@ -54,6 +56,17 @@ public final class FarmersDelightGameTests {
         helper.assertTrue(cooking.getCookingTime() == 600, "The base campfire cooking time should be 600 ticks");
         helper.assertTrue(!cooking.matches(new SingleRecipeInput(new ItemStack(Items.WHEAT)), helper.getLevel()),
                 "Raw wheat should not replace dough in the cooking recipe");
+        helper.succeed();
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
+    public static void horseMeatCooksIntoOneCookedHorseMeat(GameTestHelper helper) {
+        var input = new SingleRecipeInput(new ItemStack(BeshNStuffMod.HORSE_MEAT.get()));
+        var recipe = helper.getLevel().getRecipeManager().getRecipeFor(RecipeType.CAMPFIRE_COOKING, input, helper.getLevel()).orElseThrow();
+        helper.assertTrue(recipe.id().equals(HORSE_MEAT_RECIPE_ID), "Horse meat should match its campfire recipe for skillet support");
+        ItemStack result = recipe.value().assemble(input, helper.getLevel().registryAccess());
+        helper.assertTrue(result.is(BeshNStuffMod.COOKED_HORSE_MEAT.get()) && result.getCount() == 1,
+                "One raw horse meat should produce exactly one cooked horse meat with Farmer's Delight installed");
         helper.succeed();
     }
 
@@ -118,7 +131,11 @@ public final class FarmersDelightGameTests {
                 new TestFunction("defaultBatch", "farmersdelightgametests.skilletCooksDoughIntoTwoBaursak",
                         "minecraft:bastion/mobs/empty", 160, 0, true, FarmersDelightGameTests::skilletCooksDoughIntoTwoBaursak),
                 new TestFunction("defaultBatch", "farmersdelightgametests.unheatedSkilletDoesNotCookDough",
-                        "minecraft:bastion/mobs/empty", 160, 0, true, FarmersDelightGameTests::unheatedSkilletDoesNotCookDough));
+                        "minecraft:bastion/mobs/empty", 160, 0, true, FarmersDelightGameTests::unheatedSkilletDoesNotCookDough),
+                new TestFunction("defaultBatch", "farmersdelightgametests.skilletCooksHorseMeat",
+                        "minecraft:bastion/mobs/empty", 160, 0, true, FarmersDelightGameTests::skilletCooksHorseMeat),
+                new TestFunction("defaultBatch", "farmersdelightgametests.unheatedSkilletDoesNotCookHorseMeat",
+                        "minecraft:bastion/mobs/empty", 160, 0, true, FarmersDelightGameTests::unheatedSkilletDoesNotCookHorseMeat));
     }
 
     private static void skilletCooksDoughIntoTwoBaursak(GameTestHelper helper) {
@@ -157,6 +174,44 @@ public final class FarmersDelightGameTests {
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BuiltInRegistries.ITEM.getOptional(DOUGH_ID).orElseThrow()));
         helper.useBlock(pos, player);
         helper.assertTrue(player.getMainHandItem().isEmpty(), "The skillet should accept the wheat dough");
+    }
+
+    private static void skilletCooksHorseMeat(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(1, 2, 1);
+        helper.setBlock(pos.below(), Blocks.CAMPFIRE);
+        placeHorseMeatInSkillet(helper, pos);
+
+        helper.runAtTickTime(140, () -> {
+            helper.assertItemEntityCountIs(BeshNStuffMod.COOKED_HORSE_MEAT.get(), pos, 3.0, 1);
+            var player = helper.makeMockPlayer(GameType.SURVIVAL);
+            helper.useBlock(pos, player);
+            helper.assertTrue(player.getMainHandItem().isEmpty(), "Skillet cooking should consume the raw horse meat");
+            helper.succeed();
+        });
+    }
+
+    private static void unheatedSkilletDoesNotCookHorseMeat(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(1, 2, 1);
+        helper.setBlock(pos.below(), Blocks.STONE);
+        placeHorseMeatInSkillet(helper, pos);
+
+        helper.runAtTickTime(140, () -> {
+            helper.assertItemEntityNotPresent(BeshNStuffMod.COOKED_HORSE_MEAT.get(), pos, 3.0);
+            var player = helper.makeMockPlayer(GameType.SURVIVAL);
+            helper.useBlock(pos, player);
+            ItemStack remaining = player.getMainHandItem();
+            helper.assertTrue(remaining.is(BeshNStuffMod.HORSE_MEAT.get()) && remaining.getCount() == 1,
+                    "An unheated skillet should retain the raw horse meat");
+            helper.succeed();
+        });
+    }
+
+    private static void placeHorseMeatInSkillet(GameTestHelper helper, BlockPos pos) {
+        helper.setBlock(pos, BuiltInRegistries.BLOCK.getOptional(SKILLET_ID).orElseThrow());
+        var player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BeshNStuffMod.HORSE_MEAT.get()));
+        helper.useBlock(pos, player);
+        helper.assertTrue(player.getMainHandItem().isEmpty(), "The skillet should accept raw horse meat");
     }
 
     private static CookingPotBlockEntity prepareCookingPot(GameTestHelper helper, boolean heated, int inputCount) {
