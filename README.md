@@ -1,5 +1,7 @@
 # Besh&Stuff
 
+<img src=".idea/icon.png" alt="Besh&amp;Stuff icon" width="128" height="128">
+
 [![Mod loader: NeoForge](https://img.shields.io/badge/loader-NeoForge-orange?style=flat)](https://neoforged.net/)
 [![Supported Minecraft versions](https://img.shields.io/modrinth/game-versions/besh-n-stuff?style=flat&label=Minecraft)](https://modrinth.com/mod/besh-n-stuff/versions)
 
